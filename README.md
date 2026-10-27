@@ -86,3 +86,4 @@ css/styles.css
 js/          data.js, main.js, auth.js, clubs.js, events.js, member.js, management.js, admin.js
 assets/images/logo.svg   (replace with the official JNEC logo)
 ```
+thank you
