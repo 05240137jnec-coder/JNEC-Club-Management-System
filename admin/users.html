@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Club Management System for Jigme Namgyel Engineering College, Dewathang">
+  <title>User &amp; Role Management | JNEC Clubs</title>
+  <link rel="icon" href="../assets/images/logo.svg" type="image/svg+xml">
+  <!-- Bootstrap 5 + Bootstrap Icons (official CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="../css/styles.css" rel="stylesheet">
+</head>
+<body data-page="admin-users" data-layout="dashboard" data-root="../" data-role="admin" data-title="User & Role Management">
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <div class="app-shell">
+    <aside id="sidebar" class="sidebar" aria-label="Sidebar"></aside>
+    <div class="app-main">
+      <header id="topbar"></header>
+      <main id="main" class="app-content">
+        <div class="row g-3 mb-3">
+          <div class="col-4"><div class="card"><div class="card-body py-2 text-center"><div class="stat-value" id="count-member">0</div><small class="text-muted">Students</small></div></div></div>
+          <div class="col-4"><div class="card"><div class="card-body py-2 text-center"><div class="stat-value" id="count-secretary">0</div><small class="text-muted">Secretaries</small></div></div></div>
+          <div class="col-4"><div class="card"><div class="card-body py-2 text-center"><div class="stat-value" id="count-admin">0</div><small class="text-muted">Admins</small></div></div></div>
+        </div>
+        <div class="filter-bar mb-3">
+          <div class="row g-2 align-items-end">
+            <div class="col-md-5">
+              <label for="userSearch" class="form-label small">Search</label>
+              <input type="search" class="form-control" id="userSearch" placeholder="Name, email or ID">
+            </div>
+            <div class="col-6 col-md-2">
+              <label for="userRole" class="form-label small">Role</label>
+              <select class="form-select" id="userRole"><option value="">All roles</option><option value="member">Student</option><option value="secretary">Secretary</option><option value="admin">Admin</option></select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label for="userStatus" class="form-label small">Status</label>
+              <select class="form-select" id="userStatus"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
+            </div>
+            <div class="col-md-3 d-grid">
+              <button class="btn btn-primary" id="addUserBtn"><i class="bi bi-person-plus me-1"></i>Add user</button>
+            </div>
+          </div>
+        </div>
+        <section class="card">
+          <div class="card-header"><span class="small text-muted" id="userCount" aria-live="polite"></span></div>
+          <div class="table-responsive"><table class="table mb-0">
+            <thead><tr><th scope="col">User</th><th scope="col">ID</th><th scope="col">Role</th><th scope="col">Department</th><th scope="col">Status</th><th scope="col" class="text-end">Actions</th></tr></thead>
+            <tbody id="usersBody"></tbody>
+          </table></div>
+        </section>
+      </main>
+      <footer id="footer"></footer>
+    </div>
+  </div>
+
+  <!-- Add / edit user modal -->
+  <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+      <form class="modal-content" id="userForm">
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="userModalTitle">Add new user</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="uName" class="form-label">Full name</label>
+              <input type="text" class="form-control" id="uName" name="name" required minlength="3" maxlength="60" pattern="[A-Za-z .'\-]+">
+              <div class="invalid-feedback">Enter a full name (letters only).</div>
+            </div>
+            <div class="col-md-6">
+              <label for="uEmail" class="form-label">Email</label>
+              <input type="email" class="form-control" id="uEmail" name="email" required>
+              <div class="invalid-feedback" id="userEmailFeedback">Enter a valid email address.</div>
+            </div>
+            <div class="col-md-6">
+              <label for="uStudentId" class="form-label">Student / staff ID</label>
+              <input type="text" class="form-control" id="uStudentId" name="studentId" required maxlength="20">
+              <div class="invalid-feedback" id="userIdFeedback">Student/staff ID is required.</div>
+            </div>
+            <div class="col-md-6">
+              <label for="uPhone" class="form-label">Mobile number</label>
+              <input type="tel" class="form-control" id="uPhone" name="phone" required pattern="(17|77)[0-9]{6}">
+              <div class="invalid-feedback">Enter an 8-digit number starting with 17 or 77.</div>
+            </div>
+            <div class="col-md-6">
+              <label for="uRole" class="form-label">Role</label>
+              <select class="form-select" id="uRole" name="role" required>
+                <option value="member">Student Member</option>
+                <option value="secretary">Club Secretary</option>
+                <option value="admin">System Administrator</option>
+              </select>
+            </div>
+            <!-- Only shown when the role is "Club Secretary" -->
+            <div class="col-md-6" id="clubGroup">
+              <label for="uClub" class="form-label">Assigned club</label>
+              <select class="form-select" id="uClub" name="clubId"></select>
+              <div class="invalid-feedback">A secretary must be assigned to a club.</div>
+            </div>
+            <div class="col-md-6">
+              <label for="uDept" class="form-label">Department</label>
+              <select class="form-select" id="uDept" name="department" required></select>
+              <div class="invalid-feedback">Please choose a department.</div>
+            </div>
+            <div class="col-md-6">
+              <label for="uStatus" class="form-label">Account status</label>
+              <select class="form-select" id="uStatus" name="status" required>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label for="uPassword" class="form-label">Password</label>
+              <input type="password" class="form-control" id="uPassword" name="password" minlength="6" autocomplete="new-password">
+              <small class="text-muted" id="passwordHelp">At least 6 characters.</small>
+              <div class="invalid-feedback">Password must be at least 6 characters.</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save user</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS, then our scripts (order matters: data -> main -> auth -> page modules) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/clubs.js"></script>
+  <script src="../js/events.js"></script>
+  <script src="../js/member.js"></script>
+  <script src="../js/management.js"></script>
+  <script src="../js/admin.js"></script>
+</body>
+</html>

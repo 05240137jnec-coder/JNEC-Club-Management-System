@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Club Management System for Jigme Namgyel Engineering College, Dewathang">
+  <title>Home | JNEC Clubs</title>
+  <link rel="icon" href="assets/images/logo.jpg" type="image/jgp+xml">
+  <!-- Bootstrap 5 + Bootstrap Icons (official CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="css/styles.css" rel="stylesheet">
+</head>
+<body data-page="home" data-layout="public">
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <div id="navbar"></div>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero position-relative overflow-hidden text-white">
+      <!-- College photo background (Bootstrap utilities: full-size image + dark tint behind the content) -->
+      <img src="image/images.jpeg" alt="" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover z-0">
+      <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-25 z-1"></div>
+      <div class="container position-relative z-2">
+        <div class="row align-items-center g-5">
+          <div class="col-lg-7">
+            <p class="eyebrow text-warning mb-2">Jigme Namgyel Engineering College · Dewathang</p>
+            <h1 class="display-5 mb-3">Discover, join and lead <span>campus clubs</span> in one place</h1>
+            <p class="lead opacity-75 mb-4">Explore JNEC clubs, apply for membership, register for events, get announcements and track your participation - all from a single platform.</p>
+            <form id="heroSearch" class="hero-search mb-4" role="search">
+              <div class="input-group input-group-lg shadow">
+                <span class="input-group-text bg-white border-0"><i class="bi bi-search"></i></span>
+                <label for="heroQ" class="visually-hidden">Search clubs</label>
+                <input id="heroQ" name="q" type="search" class="form-control" placeholder="Search clubs">
+                <button class="btn btn-accent px-4" type="submit">Search</button>
+              </div>
+            </form>
+            <div class="d-flex flex-wrap gap-2" id="heroActions">
+              <a class="btn btn-accent btn-lg" href="register.html"><i class="bi bi-person-plus me-2"></i>Join as a student</a>
+              <a class="btn btn-outline-light btn-lg" href="clubs.html">Explore clubs</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="container stats-strip" aria-label="Quick statistics">
+      <div class="row g-3">
+        <div class="col-6 col-md-3"><div class="stat-pill"><strong id="homeStatClubs">0</strong><span class="text-muted small">Active clubs</span></div></div>
+        <div class="col-6 col-md-3"><div class="stat-pill"><strong id="homeStatMembers">0</strong><span class="text-muted small">Club memberships</span></div></div>
+        <div class="col-6 col-md-3"><div class="stat-pill"><strong id="homeStatEvents">0</strong><span class="text-muted small">Upcoming events</span></div></div>
+        <div class="col-6 col-md-3"><div class="stat-pill"><strong id="homeStatStudents">0</strong><span class="text-muted small">Registered students</span></div></div>
+      </div>
+    </section>
+
+    <!-- Popular clubs -->
+    <section class="container py-5">
+      <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+        <div><p class="eyebrow mb-1">Find your people</p><h2 class="section-heading mb-0">Popular clubs</h2></div>
+        <a href="clubs.html" class="btn btn-outline-primary btn-sm">View all clubs <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div id="categoryChips" class="mb-3"></div>
+      <div class="row g-4" id="featuredClubs"></div>
+    </section>
+
+    <!-- Upcoming events -->
+    <section class="bg-white py-5 border-top border-bottom">
+      <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+          <div><p class="eyebrow mb-1">Don't miss out</p><h2 class="section-heading mb-0">Upcoming events</h2></div>
+          <a href="events.html" class="btn btn-outline-primary btn-sm">All events <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="row g-4" id="homeEvents"></div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="container py-5">
+      <div class="text-center mb-4">
+        <p class="eyebrow mb-1">Why use the system</p>
+        <h2 class="section-heading">Everything about clubs, in one platform</h2>
+      </div>
+      <div class="row g-4 text-center">
+        <div class="col-sm-6 col-lg-3"><div class="card h-100"><div class="card-body p-4"><span class="feature-icon mb-3"><i class="bi bi-person-plus"></i></span><h3 class="h6">Join clubs online</h3><p class="small text-muted mb-0">Apply for membership and follow your application status.</p></div></div></div>
+        <div class="col-sm-6 col-lg-3"><div class="card h-100"><div class="card-body p-4"><span class="feature-icon mb-3"><i class="bi bi-calendar-check"></i></span><h3 class="h6">Register for events</h3><p class="small text-muted mb-0">Reserve your seat for workshops, competitions and cultural nights.</p></div></div></div>
+        <div class="col-sm-6 col-lg-3"><div class="card h-100"><div class="card-body p-4"><span class="feature-icon mb-3"><i class="bi bi-bell"></i></span><h3 class="h6">Never miss updates</h3><p class="small text-muted mb-0">Get announcements from your clubs and the college instantly.</p></div></div></div>
+        <div class="col-sm-6 col-lg-3"><div class="card h-100"><div class="card-body p-4"><span class="feature-icon mb-3"><i class="bi bi-graph-up-arrow"></i></span><h3 class="h6">Track participation</h3><p class="small text-muted mb-0">See your attendance history and share feedback with clubs.</p></div></div></div>
+      </div>
+    </section>
+
+    <!-- Announcements -->
+    <section class="container pb-5">
+      <div class="mb-3"><p class="eyebrow mb-1">Notice board</p><h2 class="section-heading mb-0">College-wide announcements</h2></div>
+      <div class="row g-4" id="homeAnnouncements"></div>
+    </section>
+
+    <!-- User roles -->
+    <section class="container pb-2">
+      <div class="row g-4">
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body p-4">
+          <span class="feature-icon mb-3"><i class="bi bi-mortarboard"></i></span>
+          <h3 class="h5">Students</h3>
+          <p class="small text-muted">Browse clubs, join, register for events, view attendance and give feedback.</p>
+          <a href="register.html" class="btn btn-primary btn-sm">Create account</a>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body p-4">
+          <span class="feature-icon mb-3"><i class="bi bi-person-workspace"></i></span>
+          <h3 class="h5">Club Secretaries</h3>
+          <p class="small text-muted">Manage club profiles, members, events, announcements, attendance and reports.</p>
+          <a href="login.html" class="btn btn-outline-primary btn-sm">Secretary login</a>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body p-4">
+          <span class="feature-icon mb-3"><i class="bi bi-shield-lock"></i></span>
+          <h3 class="h5">Administrators</h3>
+          <p class="small text-muted">Oversee all clubs, manage users and roles, and monitor system activity.</p>
+          <a href="login.html" class="btn btn-outline-primary btn-sm">Admin login</a>
+        </div></div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer"></footer>
+
+  <!-- Bootstrap JS, then our scripts (order matters: data -> main -> auth -> page modules) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/clubs.js"></script>
+  <script src="js/events.js"></script>
+  <script src="js/member.js"></script>
+  <script src="js/management.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Club Management System for Jigme Namgyel Engineering College, Dewathang">
+  <title>Student Dashboard | JNEC Clubs</title>
+  <link rel="icon" href="../assets/images/logo.svg" type="image/svg+xml">
+  <!-- Bootstrap 5 + Bootstrap Icons (official CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="../css/styles.css" rel="stylesheet">
+</head>
+<body data-page="member-dashboard" data-layout="dashboard" data-root="../" data-role="member" data-title="Student Dashboard">
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <div class="app-shell">
+    <aside id="sidebar" class="sidebar" aria-label="Sidebar"></aside>
+    <div class="app-main">
+      <header id="topbar"></header>
+      <main id="main" class="app-content">
+        <div class="welcome-banner mb-4">
+          <h2 class="h4 mb-1">Kuzuzangpo, <span id="welcomeName">Student</span>! 👋</h2>
+          <p class="mb-3 opacity-75">Here is what's happening in your clubs today.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-accent btn-sm" href="../events.html"><i class="bi bi-calendar-plus me-1"></i>Find events</a>
+            <a class="btn btn-outline-light btn-sm" href="join-club.html"><i class="bi bi-person-plus me-1"></i>Join a club</a>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-xl-3">
+            <div class="card stat-card h-100"><div class="card-body">
+              <span class="stat-icon blue"><i class="bi bi-people"></i></span>
+              <div><div class="stat-value" id="statClubs">0</div><div class="stat-label">My clubs</div><small class="text-muted" id="statPending"></small></div>
+            </div></div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="card stat-card h-100"><div class="card-body">
+              <span class="stat-icon gold"><i class="bi bi-calendar-check"></i></span>
+              <div><div class="stat-value" id="statEvents">0</div><div class="stat-label">Upcoming registrations</div></div>
+            </div></div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="card stat-card h-100"><div class="card-body">
+              <span class="stat-icon green"><i class="bi bi-clipboard-check"></i></span>
+              <div><div class="stat-value" id="statAttendance">0</div><div class="stat-label">Attendance rate</div><small class="text-muted" id="statAttendanceSub"></small></div>
+            </div></div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="card stat-card h-100"><div class="card-body">
+              <span class="stat-icon red"><i class="bi bi-bell"></i></span>
+              <div><div class="stat-value" id="statUnread">0</div><div class="stat-label">Unread announcements</div></div>
+            </div></div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-xl-8">
+            <section class="card mb-4">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h6 mb-0">My upcoming events</h2><a class="small" href="../events.html?status=registered">All events</a>
+              </div>
+              <div class="card-body p-0" id="dashEvents"></div>
+            </section>
+            <section class="card mb-4">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h6 mb-0">Latest announcements</h2><a class="small" href="announcements.html">View all</a>
+              </div>
+              <div class="card-body" id="dashAnnouncements"></div>
+            </section>
+          </div>
+          <div class="col-xl-4">
+            <section class="card mb-4">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h6 mb-0">Membership status</h2><a class="small" href="my-clubs.html">My clubs</a>
+              </div>
+              <ul class="list-group list-group-flush" id="dashMemberships"></ul>
+            </section>
+            <section class="card">
+              <div class="card-header"><h2 class="h6 mb-0">Clubs you might like</h2></div>
+              <div class="card-body" id="dashSuggestions"></div>
+            </section>
+          </div>
+        </div>
+      </main>
+      <footer id="footer"></footer>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS, then our scripts (order matters: data -> main -> auth -> page modules) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/clubs.js"></script>
+  <script src="../js/events.js"></script>
+  <script src="../js/member.js"></script>
+  <script src="../js/management.js"></script>
+  <script src="../js/admin.js"></script>
+</body>
+</html>
