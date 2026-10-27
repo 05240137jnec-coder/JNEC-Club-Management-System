@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Logo placeholder: replace with the official JNEC logo -->
-  <rect width="64" height="64" rx="14" fill="#e8a317"/>
-  <path d="M32 14 6 26l26 12 20-9.2V42h4V26z" fill="#16325c"/>
-  <path d="M16 34v9c0 4 7.2 7 16 7s16-3 16-7v-9l-16 7.4z" fill="#16325c"/>
-</svg>
