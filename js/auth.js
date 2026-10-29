@@ -33,6 +33,7 @@ function lockMessage(until) {
 }
 
 function login(identifier, password) {
+  reloadData(); // always check against the latest saved accounts
   const key = identifier.trim().toLowerCase();
   const user = db.users.find(u => u.email.toLowerCase() === key || u.studentId.toLowerCase() === key);
   const k = attemptKey(user, key);
@@ -60,6 +61,14 @@ function login(identifier, password) {
   saveData();
   startSession(user);
   return { ok: true, user };
+}
+
+// Which folders each role may open (matches the data-role on each page)
+function roleCanOpen(path, role) {
+  if (path.includes("/admin/")) return role === "admin";
+  if (path.includes("/secretary/")) return role === "secretary" || role === "admin";
+  if (path.includes("/member/")) return role === "member";
+  return true; // public pages and account/profile.html
 }
 
 function startSession(user) {
@@ -106,7 +115,7 @@ function guardPage() {
   // Users with a temporary password must change it first
   if (user && user.mustChangePassword && document.body.dataset.page !== "profile") {
     setFlash("Please change your temporary password before continuing.", "warning");
-    window.location.replace(ROOT + "member/profile.html");
+    window.location.replace(ROOT + "account/profile.html");
     return false;
   }
 
@@ -153,12 +162,12 @@ registerPage("login", () => {
     setFlash(`Welcome back, ${user.name.split(" ")[0]}!`);
     if (user.mustChangePassword) {
       setFlash("You are using a temporary password. Please set a new password now.", "warning");
-      window.location.href = ROOT + "member/profile.html";
+      window.location.href = ROOT + "account/profile.html";
       return;
     }
     const redirect = getParam("redirect");
-    // only follow redirects to pages on this same site
-    const safe = redirect && redirect.startsWith("/") && !redirect.startsWith("//");
+    // only follow redirects to pages on this same site that this role is allowed to open
+    const safe = redirect && redirect.startsWith("/") && !redirect.startsWith("//") && roleCanOpen(redirect, user.role);
     window.location.href = safe ? redirect : dashboardUrl(user.role);
   }
 
@@ -176,6 +185,7 @@ registerPage("login", () => {
   /* ---- Google sign-in ---- */
   const googleBox = document.getElementById("googleLogin");
   function handleGoogleCredential(response) {
+    reloadData();
     let info;
     try { info = decodeJwt(response.credential); } catch (e) { showError("Google sign-in failed. Please try again."); return; }
     const validIssuer = info.iss === "accounts.google.com" || info.iss === "https://accounts.google.com";
@@ -273,6 +283,7 @@ registerPage("register", () => {
   }
 
   setupForm(form, values => {
+    reloadData(); // include accounts created in other tabs
     checkEmail(); checkStudentId(); checkConfirm();
     if (!form.checkValidity()) { form.classList.add("was-validated"); return; }
 

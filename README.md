@@ -14,12 +14,12 @@ Built with HTML5, CSS3, JavaScript, Bootstrap 5 and Bootstrap Icons.
 
 The system starts with the college clubs and one administrator account:
 
-| Email | Temporary password |
-|-------|--------------------|
+| Email | Password |
+|-------|----------|
 | admin@jnec.edu.bt | Admin@123 |
 
-At first login you are taken to **My Profile** and must set a new password before using the system.
-You can change the default email/password in `js/data.js` (`DEFAULT_ADMIN_EMAIL`, `DEFAULT_ADMIN_PASSWORD`) before the first run.
+Logging in with these goes straight to the **Admin Dashboard**. You can change the password any time in **My Profile**.
+The default email/password are set in `js/data.js` (`DEFAULT_ADMIN_EMAIL`, `DEFAULT_ADMIN_PASSWORD`).
 
 ## Setting up the system
 

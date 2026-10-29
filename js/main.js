@@ -257,7 +257,7 @@ const SIDEBAR_MENUS = {
     { label: "Announcements", icon: "megaphone", href: "member/announcements.html", badge: "unread" },
     { label: "Attendance", icon: "clipboard-check", href: "member/attendance.html" },
     { label: "Feedback", icon: "chat-square-heart", href: "member/feedback.html" },
-    { label: "My Profile", icon: "person-circle", href: "member/profile.html" }
+    { label: "My Profile", icon: "person-circle", href: "account/profile.html" }
   ],
   secretary: [
     { section: "Overview" },
@@ -270,7 +270,7 @@ const SIDEBAR_MENUS = {
     { label: "Announcements", icon: "megaphone", href: "secretary/announcements.html" },
     { label: "Reports", icon: "bar-chart-line", href: "secretary/reports.html" },
     { section: "Account" },
-    { label: "My Profile", icon: "person-circle", href: "member/profile.html" },
+    { label: "My Profile", icon: "person-circle", href: "account/profile.html" },
     { label: "View Public Site", icon: "globe2", href: "index.html" }
   ],
   admin: [
@@ -286,7 +286,7 @@ const SIDEBAR_MENUS = {
     { label: "Announcements", icon: "megaphone", href: "secretary/announcements.html" },
     { label: "Reports", icon: "bar-chart-line", href: "secretary/reports.html" },
     { section: "Account" },
-    { label: "My Profile", icon: "person-circle", href: "member/profile.html" },
+    { label: "My Profile", icon: "person-circle", href: "account/profile.html" },
     { label: "View Public Site", icon: "globe2", href: "index.html" }
   ]
 };
@@ -364,7 +364,7 @@ function userDropdown(user) {
       <ul class="dropdown-menu dropdown-menu-end shadow">
         <li><span class="dropdown-item-text small text-muted">${escapeHtml(roleLabel(user.role))}</span></li>
         <li><a class="dropdown-item" href="${dashboardUrl(user.role)}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
-        <li><a class="dropdown-item" href="${ROOT}member/profile.html"><i class="bi bi-person-circle me-2"></i>My Profile</a></li>
+        <li><a class="dropdown-item" href="${ROOT}account/profile.html"><i class="bi bi-person-circle me-2"></i>My Profile</a></li>
         <li><hr class="dropdown-divider"></li>
         <li><button class="dropdown-item text-danger" data-action="logout"><i class="bi bi-box-arrow-right me-2"></i>Log out</button></li>
       </ul>

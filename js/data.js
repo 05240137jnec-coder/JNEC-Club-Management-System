@@ -46,12 +46,12 @@ function uid(prefix) {
    (events, announcements, attendance…) is added through the system.
 */
 const DEFAULT_ADMIN_EMAIL = "admin@jnec.edu.bt";
-const DEFAULT_ADMIN_PASSWORD = "Admin@123"; // must be changed at first login
+const DEFAULT_ADMIN_PASSWORD = "Admin@123"; // default admin login (can be changed later in My Profile)
 
 function getInitialData() {
   return {
     users: [
-      { id: "u1", name: "System Administrator", email: DEFAULT_ADMIN_EMAIL, password: DEFAULT_ADMIN_PASSWORD, mustChangePassword: true, role: "admin", studentId: "ADMIN-001", department: "Administration", year: "", phone: "", clubId: null, status: "active", bio: "", joined: todayStr() }
+      { id: "u1", name: "System Administrator", email: DEFAULT_ADMIN_EMAIL, password: DEFAULT_ADMIN_PASSWORD, mustChangePassword: false, role: "admin", studentId: "ADMIN-001", department: "Administration", year: "", phone: "", clubId: null, status: "active", bio: "", joined: todayStr() }
     ],
 
     clubs: [
@@ -80,8 +80,35 @@ function getInitialData() {
 
 /* ---------- Load / save the whole database ---------- */
 let db = loadData();
-if (!db.resetRequests) db.resetRequests = [];
-if (!db.loginAttempts) db.loginAttempts = {};
+fillMissingLists();
+
+function fillMissingLists() {
+  if (!db.resetRequests) db.resetRequests = [];
+  if (!db.loginAttempts) db.loginAttempts = {};
+  // The default admin logs in straight to the dashboard (no forced password change)
+  const defaultAdmin = db.users.find(u => u.id === "u1" && u.password === DEFAULT_ADMIN_PASSWORD);
+  if (defaultAdmin && defaultAdmin.mustChangePassword) {
+    defaultAdmin.mustChangePassword = false;
+    saveData();
+  }
+}
+
+/* Keep this page's copy of the data up to date.
+   Without this, a page that was opened earlier (for example the login page)
+   would not see an account created in another tab, and saving its old copy
+   would erase that account. */
+function reloadData() {
+  db = loadData();
+  fillMissingLists();
+}
+// another tab saved changes → use them here too
+window.addEventListener("storage", event => {
+  if (event.key === STORAGE_KEY && event.newValue) reloadData();
+});
+// page shown again with the browser's Back/Forward buttons → reload saved data
+window.addEventListener("pageshow", event => {
+  if (event.persisted) reloadData();
+});
 
 function loadData() {
   try {

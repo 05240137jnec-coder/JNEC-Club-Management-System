@@ -316,8 +316,15 @@ registerPage("profile", () => {
       pwForm.newPassword.addEventListener("input", () => pwForm.newPassword.setCustomValidity(""), { once: true });
       return;
     }
+    const wasTemporary = getCurrentUser().mustChangePassword;
     DB.update("users", user.id, { password: values.newPassword, mustChangePassword: false });
     logActivity(user.id, "Changed password");
+    if (wasTemporary) {
+      // first login is finished: go to this person's own dashboard (admin, secretary or member)
+      setFlash("Password changed. Welcome to your dashboard!");
+      window.location.href = dashboardUrl(user.role);
+      return;
+    }
     resetForm(pwForm);
     document.getElementById("tempPasswordAlert").classList.add("d-none");
     refreshLayout();
