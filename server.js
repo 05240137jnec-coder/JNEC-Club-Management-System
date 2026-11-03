@@ -21,7 +21,7 @@ const path = require('path');
 const fs = require('fs');
 const store = load('./db');
 const { errorHandler } = load('./middleware/validate');
-const apiRoutes = load('./api');
+const logger = load('./middleware/logger');
 
 if (!process.env.JWT_SECRET) console.warn('WARNING: set JWT_SECRET in .env before going live.');
 
@@ -30,6 +30,7 @@ app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: false 
 app.use(cors());
 app.use(express.json({ limit: '8mb' })); // club logos are sent as images inside the JSON
 
+app.use(logger);
 app.use('/api', apiRoutes);
 
 // Serve the website from the same server
