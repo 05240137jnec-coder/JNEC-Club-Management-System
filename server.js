@@ -1,4 +1,3 @@
-// FILE LOCATION: jnec-backend/server.js
 // Loads a package or file; if it is missing, prints a clear message instead of a long error.
 function load(name) {
   try { return require(name); } catch (e) {
@@ -6,7 +5,7 @@ function load(name) {
     console.error('The server could not start. Something is missing.');
     console.error('Problem: ' + String(e.message).split('\n')[0]);
     console.error(e.code === 'MODULE_NOT_FOUND'
-      ? 'Fix: run  npm install  (if a package is missing), and make sure these are all in the jnec-backend folder:\n     server.js, api.js, db.js, logic.js, seed.json, routes/ (5 files), middleware/ (2 files)'
+      ? 'Fix: run  npm install  (if a package is missing), and make sure these are all in the jnec-backend folder:\n     server.js, api.js, db.js, logic.js, seed.json, routes/ (5 files), middleware/ (3 files)'
       : 'Fix: make sure every file was replaced with the newest version.');
     console.error('==================================================\n');
     process.exit(1);
@@ -22,6 +21,7 @@ const fs = require('fs');
 const store = load('./db');
 const { errorHandler } = load('./middleware/validate');
 const logger = load('./middleware/logger');
+const apiRoutes = load('./api');
 
 if (!process.env.JWT_SECRET) console.warn('WARNING: set JWT_SECRET in .env before going live.');
 
@@ -30,7 +30,7 @@ app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: false 
 app.use(cors());
 app.use(express.json({ limit: '8mb' })); // club logos are sent as images inside the JSON
 
-app.use(logger);
+app.use(logger);                  // print one line per API request
 app.use('/api', apiRoutes);
 
 // Serve the website from the same server

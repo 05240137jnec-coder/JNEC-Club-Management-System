@@ -3,9 +3,10 @@
   "version": "3.0.0",
   "description": "REST API for the JNEC Club Management System (Node.js + MySQL)",
   "main": "server.js",
-  "scripts": {
+    "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "reset": "node reset.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
