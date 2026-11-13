@@ -4,7 +4,16 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const store = require('./db');
 
-const SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
+// Read lazily so it works no matter when dotenv.config() runs.
+const DEV_SECRET = 'dev-secret-change-me';
+let warned = false;
+function secret() {
+  if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
+  if (process.env.NODE_ENV === 'production') throw new Error('JWT_SECRET must be set in production.');
+  if (!warned) { warned = true; console.warn('[logic] JWT_SECRET is not set. Using an insecure development secret.'); }
+  return DEV_SECRET;
+}
+
 const DEPARTMENTS = ['Civil Engineering & Surveying', 'Electrical & Electronics Engineering', 'Information Technology', 'Mechanical Engineering', 'Humanities & Management'];
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SAFE_ID = /^[a-z][a-z0-9]{5,40}$/;
@@ -14,8 +23,25 @@ class HttpError extends Error { constructor(code, message, fields) { super(messa
 const need = (cond, code, msg) => { if (!cond) throw new HttpError(code, msg); };
 
 const pad = (n) => String(n).padStart(2, '0');
-const today = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+// "Today" in Bhutan time (UTC+6), so dates are correct even if the server runs in UTC.
+const today = () => {
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Thimphu', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+    const get = (t) => parts.find((p) => p.type === t).value;
+    return `${get('year')}-${get('month')}-${get('day')}`;
+  } catch {
+    const d = new Date();
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }
+};
 const str = (v) => String(v ?? '').trim();
+// True only for real calendar dates such as 2026-03-15 (rejects 2026-02-31, 2026-99-99)
+const isDate = (s) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(str(s));
+  if (!m) return false;
+  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  return d.getUTCFullYear() === +m[1] && d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3];
+};
 const isAdmin = (u) => u.role === 'admin';
 const manages = (u, clubId) => isAdmin(u) || (u.role === 'secretary' && !!u.clubId && u.clubId === clubId);
 const stripSecret = (u) => { const { passwordHash, ...rest } = u; return rest; };
@@ -25,11 +51,11 @@ const idTaken = (sid, exceptId) => store.all('users').some((u) => u.id !== excep
 const eventStatus = (ev) => (ev.cancelled ? 'cancelled' : ev.date < today() ? 'completed' : 'upcoming');
 
 /* ---------------- Authentication ---------------- */
-const sign = (u) => jwt.sign({ id: u.id }, SECRET, { expiresIn: '7d' });
+const sign = (u) => jwt.sign({ id: u.id }, secret(), { expiresIn: '7d' });
 function userFromToken(token) {
   if (!token) return null;
   try {
-    const u = store.get('users', jwt.verify(token, SECRET).id);
+    const u = store.get('users', jwt.verify(token, secret(), { algorithms: ['HS256'] }).id);
     return u && u.status === 'active' ? u : null;
   } catch { return null; }
 }
@@ -37,28 +63,30 @@ function userFromToken(token) {
 function login(identifier, password) {
   const key = str(identifier).toLowerCase();
   const u = store.all('users').find((x) => x.email.toLowerCase() === key || (x.studentId || '').toLowerCase() === key);
-  if (!u || !bcrypt.compareSync(String(password || ''), u.passwordHash)) throw new HttpError(401, 'Incorrect email/student ID or password.');
+  // Also guard against a user record that has no passwordHash (would otherwise crash bcrypt)
+  if (!u || !u.passwordHash || !bcrypt.compareSync(String(password || ''), u.passwordHash)) throw new HttpError(401, 'Incorrect email/student ID or password.');
   if (u.status !== 'active') throw new HttpError(403, 'Your account is inactive. Please contact the system administrator.');
   return { token: sign(u), user: stripSecret(u) };
 }
 
 function register(b) {
+  b = b || {};
   const f = {};
-  if (!/^[A-Za-z .'\-]{3,60}$/.test(str(b.name))) f.name = 'Enter your full name (letters only, at least 3 characters).';
+  if (!/^[A-Za-z .'\-]{3,60}$/.test(str(b.name)) || !/[A-Za-z]{2}/.test(str(b.name))) f.name = 'Enter your full name (letters only, at least 3 characters).';
   if (!/^[0-9]{8}$/.test(str(b.studentId))) f.studentId = 'Student ID must be exactly 8 digits.';
   if (!EMAIL.test(str(b.email))) f.email = 'Enter a valid email address.';
   if (!/^(17|77)[0-9]{6}$/.test(str(b.phone))) f.phone = 'Enter an 8-digit Bhutanese mobile number starting with 17 or 77.';
   if (!DEPARTMENTS.includes(b.department)) f.department = 'Please choose your department.';
   if (!['1', '2', '3', '4'].includes(String(b.year))) f.year = 'Please choose your year.';
   if (!/^(?=.*[A-Za-z])(?=.*[0-9]).{6,}$/.test(String(b.password || ''))) f.password = 'At least 6 characters with letters and numbers.';
-  if (b.password !== b.confirmPassword) f.confirmPassword = 'Passwords do not match.';
+  if (String(b.password || '') !== String(b.confirmPassword || '')) f.confirmPassword = 'Passwords do not match.';
   if (!f.email && emailTaken(str(b.email))) f.email = 'This email is already registered.';
   if (!f.studentId && idTaken(str(b.studentId))) f.studentId = 'This student ID is already registered.';
   if (Object.keys(f).length) throw new HttpError(400, 'Please fix the highlighted fields.', f);
   const u = store.put('users', {
     id: store.newId('u'), name: str(b.name), email: str(b.email).toLowerCase(), role: 'member', studentId: str(b.studentId),
     department: b.department, year: String(b.year), phone: str(b.phone), clubId: null, status: 'active', bio: '', joined: today(),
-    passwordHash: bcrypt.hashSync(b.password, 10),
+    passwordHash: bcrypt.hashSync(String(b.password), 10),
   });
   return { token: sign(u), user: stripSecret(u) };
 }
@@ -74,9 +102,9 @@ function forgot(email) {
 }
 
 function changePassword(u, current, next) {
-  need(bcrypt.compareSync(String(current || ''), u.passwordHash), 400, 'Your current password is incorrect.');
+  need(u.passwordHash && bcrypt.compareSync(String(current || ''), u.passwordHash), 400, 'Your current password is incorrect.');
   need(/^(?=.*[A-Za-z])(?=.*[0-9]).{6,}$/.test(String(next || '')), 400, 'New password needs at least 6 characters with letters and numbers.');
-  store.put('users', { ...u, passwordHash: bcrypt.hashSync(next, 10), mustChangePassword: false });
+  store.put('users', { ...u, passwordHash: bcrypt.hashSync(String(next), 10), mustChangePassword: false });
 }
 
 /* ---------------- What each visitor is allowed to see ---------------- */
@@ -108,7 +136,8 @@ function buildState(v) {
     announcements: store.all('announcements'),
     feedback: store.all('feedback'),
     resetRequests: admin ? store.all('resetRequests') : [],
-    logs: admin ? store.all('logs').reverse().slice(0, 100) : [],
+    // Copy before reversing: reverse() changes the array in place and could scramble the stored log order
+    logs: admin ? [...store.all('logs')].reverse().slice(0, 100) : [],
     reads: {},
   };
   if (v) { const r = store.get('reads', v.id); data.reads[v.id] = r ? r.ids : []; }
@@ -143,10 +172,13 @@ const RULES = {
       if (self && isAdmin(u)) need((!out.role || out.role === 'admin') && (!out.status || out.status === 'active'), 400, "You can't change your own role or deactivate yourself.");
       if ('email' in out) { out.email = str(out.email).toLowerCase(); need(EMAIL.test(out.email), 400, 'Enter a valid email address.'); need(!emailTaken(out.email, item.id), 409, 'This email is already used by another account.'); }
       if ('studentId' in out) { out.studentId = str(out.studentId); need(!out.studentId || !idTaken(out.studentId, item.id), 409, 'This ID is already used by another account.'); }
-      if ('role' in out) need(['member', 'secretary', 'admin'].includes(out.role), 400, 'Invalid role.');
+      if ('role' in out) {
+        need(['member', 'secretary', 'admin'].includes(out.role), 400, 'Invalid role.');
+        if (out.role !== 'secretary') out.clubId = null; // only secretaries belong to a club
+      }
       if ('status' in out) need(['active', 'inactive'].includes(out.status), 400, 'Invalid status.');
       if (out.clubId) need(store.get('clubs', out.clubId), 400, 'Club not found.');
-      if ('password' in out) { need(String(out.password).length >= 6, 400, 'Password must be at least 6 characters.'); out.passwordHash = bcrypt.hashSync(out.password, 10); delete out.password; }
+      if ('password' in out) { need(String(out.password).length >= 6, 400, 'Password must be at least 6 characters.'); out.passwordHash = bcrypt.hashSync(String(out.password), 10); delete out.password; }
       return out;
     },
     remove(u, item) { need(isAdmin(u), 403, 'Only the administrator can delete users.'); need(item.id !== u.id, 400, "You can't delete your own account."); },
@@ -162,7 +194,10 @@ const RULES = {
       need(manages(u, item.id), 403, 'You can only edit your own club.');
       const { id, ...out } = ch;
       if (!isAdmin(u)) { delete out.secretaryId; delete out.status; }
-      if ('name' in out) need(!store.all('clubs').some((c) => c.id !== item.id && c.name.toLowerCase() === str(out.name).toLowerCase()), 409, 'Another club already uses this name.');
+      if ('name' in out) {
+        need(str(out.name), 400, 'Club name is required.');
+        need(!store.all('clubs').some((c) => c.id !== item.id && c.name.toLowerCase() === str(out.name).toLowerCase()), 409, 'Another club already uses this name.');
+      }
       return out;
     },
     remove(u) { need(isAdmin(u), 403, 'Only the administrator can delete clubs.'); },
@@ -178,7 +213,8 @@ const RULES = {
     update(u, item, ch) {
       need(manages(u, item.clubId), 403, 'Only the club secretary can review applications.');
       need(['pending', 'approved', 'rejected'].includes(ch.status), 400, 'Invalid status.');
-      return { status: ch.status, decidedOn: ch.decidedOn || today() };
+      // The decision date is set by the server, not taken from the client
+      return { status: ch.status, decidedOn: ch.status === 'pending' ? null : today() };
     },
     remove(u, item) { need(item.userId === u.id || manages(u, item.clubId), 403, 'You cannot remove this membership.'); },
   },
@@ -187,19 +223,21 @@ const RULES = {
       need(manages(u, b.clubId) && store.get('clubs', b.clubId), 403, 'You can only create events for your own club.');
       const out = pick(b, EVENT_FIELDS);
       need(str(out.title), 400, 'Event title is required.');
-      need(/^\d{4}-\d{2}-\d{2}$/.test(str(out.date)), 400, 'A valid date is required.');
-      need(Number(out.capacity) >= 1, 400, 'Capacity must be at least 1.');
+      need(isDate(out.date), 400, 'A valid date is required.');
+      need(Number.isInteger(Number(out.capacity)) && Number(out.capacity) >= 1, 400, 'Capacity must be a whole number, at least 1.');
       return { ...out, clubId: b.clubId, capacity: Number(out.capacity) };
     },
     update(u, item, ch) {
       need(manages(u, item.clubId), 403, 'You can only edit events of your own club.');
       const out = pick(ch, EVENT_FIELDS);
+      if ('title' in out) need(str(out.title), 400, 'Event title is required.');
       if ('capacity' in out) {
         out.capacity = Number(out.capacity);
+        need(Number.isInteger(out.capacity), 400, 'Capacity must be a whole number.');
         const taken = store.all('registrations').filter((r) => r.eventId === item.id).length;
         need(out.capacity >= Math.max(1, taken), 400, `Capacity can't be lower than the ${taken} students already registered.`);
       }
-      if ('date' in out) need(/^\d{4}-\d{2}-\d{2}$/.test(str(out.date)), 400, 'A valid date is required.');
+      if ('date' in out) need(isDate(out.date), 400, 'A valid date is required.');
       return out;
     },
     remove(u, item) { need(manages(u, item.clubId), 403, 'You can only delete events of your own club.'); },
@@ -277,7 +315,7 @@ function cascade(coll, item) {
     store.remove('reads', item.id);
     store.all('clubs').filter((c) => c.secretaryId === item.id).forEach((c) => store.put('clubs', { ...c, secretaryId: null }));
   } else if (coll === 'clubs') {
-    store.all('events').filter((e) => e.clubId === item.id).forEach((e) => cascade('events', e) || store.remove('events', e.id));
+    store.all('events').filter((e) => e.clubId === item.id).forEach((e) => { cascade('events', e); store.remove('events', e.id); });
     ['memberships', 'announcements', 'feedback'].forEach((c) => R(c, (x) => x.clubId === item.id));
     store.all('users').filter((x) => x.clubId === item.id).forEach((x) => store.put('users', { ...x, clubId: null }));
   } else if (coll === 'events') {
@@ -286,8 +324,11 @@ function cascade(coll, item) {
 }
 
 const view = (coll, item) => (coll === 'users' ? stripSecret(item) : item);
-const ruleFor = (coll, op) => { const r = RULES[coll]; need(r && r[op], 404, 'This action is not available.'); return r[op]; };
-
+const ruleFor = (coll, op) => {
+  const r = Object.prototype.hasOwnProperty.call(RULES, coll) ? RULES[coll] : null;   // only real collection names
+  need(r && r[op], 404, 'This action is not available.');
+  return r[op];
+};
 function createItem(u, coll, body) {
   need(body && typeof body === 'object' && !Array.isArray(body), 400, 'Invalid data.');
   const out = ruleFor(coll, 'create')(u, { ...body });
@@ -297,13 +338,15 @@ function createItem(u, coll, body) {
 function updateItem(u, coll, id, changes) {
   const item = store.get(coll, id);
   need(item, 404, 'Record not found.');
-  need(changes && typeof changes === 'object', 400, 'Invalid data.');
+  need(changes && typeof changes === 'object' && !Array.isArray(changes), 400, 'Invalid data.');
   const out = ruleFor(coll, 'update')(u, item, { ...changes });
   return view(coll, store.put(coll, { ...item, ...out, id: item.id }));
 }
 function deleteItems(u, coll, ids) {
   const rule = ruleFor(coll, 'remove');
-  const items = (ids || []).slice(0, 1000).map((id) => store.get(coll, id)).filter(Boolean);
+  need(Array.isArray(ids), 400, 'Invalid data.');
+  const unique = [...new Set(ids.slice(0, 1000).map(String))];
+  const items = unique.map((id) => store.get(coll, id)).filter(Boolean);
   items.forEach((it) => rule(u, it)); // check everything first, then delete
   store.tx(() => items.forEach((it) => { store.remove(coll, it.id); cascade(coll, it); }));
   return items.length;
@@ -329,9 +372,14 @@ function backup() {
 }
 function restore(b) {
   need(b && Array.isArray(b.users) && Array.isArray(b.clubs) && b.users.some((x) => x.role === 'admin'), 400, 'This file is not a valid backup (it needs users, clubs and an administrator).');
-  const needHash = b.users.every((x) => x.passwordHash || x.password);
-  need(needHash, 400, 'Backup users must have passwords.');
-  store.tx(() => { store.clearAll(); store.load(b); });
+  need(b.users.every((x) => x && (x.passwordHash || x.password)), 400, 'Backup users must have passwords.');
+  // Turn any plain-text "password" in the file into a proper hash, so those users can log in
+  const users = b.users.map((x) => {
+    if (x.passwordHash) return x;
+    const { password, ...rest } = x;
+    return { ...rest, passwordHash: bcrypt.hashSync(String(password), 10) };
+  });
+  store.tx(() => { store.clearAll(); store.load({ ...b, users }); });
 }
 
 module.exports = { HttpError, userFromToken, login, register, available, forgot, changePassword, buildState, createItem, updateItem, deleteItems, markRead, addLog, backup, restore };
