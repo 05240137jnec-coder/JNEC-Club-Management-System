@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # JNEC Club Management System
 
 College Club Management System mini-project developed by a team of three JNEC students.
@@ -86,3 +87,22 @@ css/styles.css
 js/          data.js, main.js, auth.js, clubs.js, events.js, member.js, management.js, admin.js
 assets/images/logo.svg   (replace with the official JNEC logo)
 ```
+=======
+# JNEC Clubs – Backend
+
+Node.js + Express + SQLite (better-sqlite3) + JWT.
+
+## Run
+    cd jnec-backend
+    npm install
+    cp .env.example .env      # set JWT_SECRET and FRONTEND_DIR
+    npm start                 # http://localhost:3000
+
+On first start the DB is created and seeded:
+- admin@jnec.edu.bt / Admin@123
+- robotics.sec@jnec.edu.bt / Secret@123 (secretary)
+- karma@jnec.edu.bt or 05240123 / Student@123 (student)
+
+Set FRONTEND_DIR to your frontend folder; the server then serves the site and API from one origin.
+Add `<script src="js/api.js"></script>` (file `api.js` here) before data.js in each page.
+>>>>>>> 578b06e63296f0aa8dca94d9e7df42f294a20c9c

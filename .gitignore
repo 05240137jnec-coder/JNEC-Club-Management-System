@@ -1,1 +1,13 @@
+<<<<<<< HEAD
 .vscode/
+=======
+node_modules/
+.env
+data/
+*.db
+*.db-shm
+*.db-wal
+*.log
+*.tmp
+.DS_Store
+>>>>>>> 578b06e63296f0aa8dca94d9e7df42f294a20c9c
