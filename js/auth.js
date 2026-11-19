@@ -84,7 +84,7 @@ function startSession(user) {
    the same email the person registered with.
    Note: without a server the Google token is only checked in the browser
    (expiry, audience, issuer, verified email), not cryptographically verified. */
-const GOOGLE_CLIENT_ID = ""; // e.g. "1234567890-abc123.apps.googleusercontent.com"
+const GOOGLE_CLIENT_ID = "494042416068-ejk1cai8oi85ki850ptbqgllm8mp5l58.apps.googleusercontent.com";
 
 function decodeJwt(token) {
   const part = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
