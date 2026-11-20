@@ -173,7 +173,7 @@ registerPage("login", () => {
   // Where to go after a successful login (password or Google)
   function afterLogin(user, how) {
     logActivity(user.id, how === "google" ? "Logged in with Google" : "Logged in");
-    setFlash(`Welcome back, ${user.name.split(" ")[0]}!`);
+    setFlash(`Welcome, ${user.name.split(" ")[0]}!`);
     if (user.mustChangePassword) {
       setFlash("You are using a temporary password. Please set a new password now.", "warning");
       window.location.href = ROOT + "account/profile.html";
