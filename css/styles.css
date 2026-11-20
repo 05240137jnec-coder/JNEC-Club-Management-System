@@ -493,3 +493,10 @@ body.sidebar-collapsed .app-main { margin-left: 0; }
 /* Show error messages that are not direct siblings of their field */
 .was-validated :invalid ~ .field-help .invalid-feedback,
 .was-validated .rating-input:has(:invalid) ~ .invalid-feedback { display: block; }
+
+/* Hide Microsoft Edge's built-in "show password" eye.
+   We already have our own eye button next to the password box. */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
