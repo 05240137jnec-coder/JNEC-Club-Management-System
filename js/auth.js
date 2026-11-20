@@ -95,8 +95,22 @@ function decodeJwt(token) {
 function logout() {
   localStorage.removeItem(SESSION_KEY);
   setFlash("You have been logged out.", "info");
-  window.location.href = ROOT + "login.html";
+  window.location.replace(ROOT + "login.html");
+/* When the browser shows a page from its Back/Forward cache, the page does not
+   load again, so check the login again. A logged-out user is sent to the login page. */
+window.addEventListener("pageshow", event => {
+  if (!event.persisted) return;               // normal page load: guardPage() already checked
+  const roles = document.body.dataset.role;   // e.g. "secretary" or "secretary admin"
+  if (!roles) return;                          // public page (home, clubs, events): nothing to check
+  const user = getCurrentUser();
+  if (!user) {
+    window.location.replace(ROOT + "login.html");          // logged out
+  } else if (!roles.split(" ").includes(user.role)) {
+    window.location.replace(dashboardUrl(user.role));      // logged in as a different role
+  }
+});
 }
+
 
 /* Page guard. A page declares who may open it:
    <body data-role="member">  or  data-role="secretary admin"
