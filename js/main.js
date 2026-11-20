@@ -450,8 +450,7 @@ function renderSidebar() {
         <h1 class="h5 mb-0 text-truncate">${escapeHtml(document.body.dataset.title || "Dashboard")}</h1>
         <small class="text-muted d-none d-sm-block">${new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</small>
       </div>
-      ${notificationBell(user)}
-      ${userDropdown(user)}`;
+      ${notificationBell(user)}`;
   }
 }
 
