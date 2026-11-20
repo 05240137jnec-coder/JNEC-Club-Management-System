@@ -445,7 +445,7 @@ function renderSidebar() {
   if (topbar) {
     topbar.className = "topbar";
     topbar.innerHTML = `
-      <button class="btn btn-icon" id="sidebarToggle" aria-label="Toggle sidebar" aria-controls="sidebar"><i class="bi bi-list fs-4"></i></button>
+      <button class="btn btn-icon" id="sidebarToggle" aria-label="Toggle sidebar" aria-controls="sidebar"><i class="bi bi-chevron-double-left fs-4"></i></button>
       <div class="me-auto min-w-0">
         <h1 class="h5 mb-0 text-truncate">${escapeHtml(document.body.dataset.title || "Dashboard")}</h1>
         <small class="text-muted d-none d-sm-block">${new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</small>

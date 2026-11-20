@@ -500,3 +500,13 @@ input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
   display: none;
 }
+
+/* Sidebar button: « when the sidebar is open, » when it is closed */
+#sidebarToggle i { display: inline-block; transition: transform 0.2s; }
+body.sidebar-collapsed #sidebarToggle i { transform: rotate(180deg); }
+
+/* On small screens the sidebar starts closed, so start with » */
+@media (max-width: 991.98px) {
+  #sidebarToggle i { transform: rotate(180deg); }
+  body.sidebar-open #sidebarToggle i { transform: none; }
+}
